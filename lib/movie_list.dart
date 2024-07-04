@@ -17,8 +17,10 @@ class _MovieListState extends State<MovieList> {
   late HttpHelper helper;
   int moviesCount = 0;
   List movies = List.empty(growable: true);
-  // variable is used for debugging
-  String count = '0';
+  // ignore: prefer_const_constructors
+  Icon visibleIcon = Icon(Icons.search);
+  // ignore: prefer_const_constructors
+  Widget searchBar = Text('Movies');
 
   @override 
   void initState() {
@@ -31,8 +33,14 @@ class _MovieListState extends State<MovieList> {
    movies = await helper.getUpcoming();
     setState(() {
       moviesCount = movies.length;
-      // used for debugging
-      count = moviesCount.toString();
+      movies = movies;
+    });
+  }
+
+  Future search(text) async {
+    movies = await helper.findMovies(text);
+    setState(() {
+      moviesCount = movies.length;
       movies = movies;
     });
   }
@@ -40,7 +48,38 @@ class _MovieListState extends State<MovieList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Movies $count'),),
+      appBar: AppBar(
+        title: searchBar,
+        actions: <Widget> [
+          IconButton(
+            padding: const EdgeInsets.only(right: 35),
+            icon: visibleIcon,
+            onPressed: () {
+              setState(() {
+                if (visibleIcon.icon == Icons.search) {
+                  visibleIcon = const Icon(Icons.cancel);
+                  searchBar = TextField(
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20.0,
+                    ),
+                    onSubmitted: (String text) {
+                      search(text);
+                    },
+                  );
+                }
+                else {
+                  setState(() {
+                    visibleIcon = const Icon(Icons.search);
+                    searchBar = const Text('Movies');
+                    // when pressing cancel button, go back to list of all movies
+                    initialize();
+                  });
+                }
+              });
+            }
+          ),
+        ]),
       body: ListView.builder(
         itemCount: moviesCount,
         itemBuilder: (BuildContext context, int position) {
