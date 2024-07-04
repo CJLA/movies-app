@@ -9,11 +9,15 @@ class MovieList extends StatefulWidget {
 }
 
 class _MovieListState extends State<MovieList> {
+  final String iconBase = 'https://image.tmdb.org/t/p/w92';
+  final String defaultImage = 
+    'https://images.freeimages.com/images/large-previews/5eb/movie-clapboard-1184229.jpg';
+  late NetworkImage image;
   late HttpHelper helper;
   int moviesCount = 0;
+  List movies = List.empty(growable: true);
   // variable is used for debugging
   String count = '0';
-  List movies = List.empty(growable: true);
 
   @override 
   void initState() {
@@ -39,10 +43,21 @@ class _MovieListState extends State<MovieList> {
       body: ListView.builder(
         itemCount: moviesCount,
         itemBuilder: (BuildContext context, int position) {
+          if (movies[position].posterPath != null) {
+            image = NetworkImage(
+              iconBase + movies[position].posterPath
+            );
+          }
+          else {
+            image = NetworkImage(defaultImage);
+          }
           return Card(
             color: Colors.white,
             elevation: 2.0,
             child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage: image,
+              ),
               title: Text(movies[position].title),
               subtitle: Text('Released: '
               + movies[position].releaseDate + ' - Vote: '
