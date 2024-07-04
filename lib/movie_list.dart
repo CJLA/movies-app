@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'http_helper.dart';
+import 'movie_detail.dart';
 
 class MovieList extends StatefulWidget {
   const MovieList({super.key});
@@ -43,6 +44,13 @@ class _MovieListState extends State<MovieList> {
       body: ListView.builder(
         itemCount: moviesCount,
         itemBuilder: (BuildContext context, int position) {
+          String releaseDate = movies[position].releaseDate;
+          String voteAverage = movies[position].voteAverage.toString();
+          // It was really bothering me when it would say "Released:" and the date was in the future.
+          // The following lines check if the release date has come yet and if not it says, "Release Date:" instead.
+          final DateTime convertedDate = DateTime.parse(releaseDate);
+          final DateTime today = DateTime.now();
+          final String releaseHeading = convertedDate.isAfter(today) ? 'Release Date' : 'Released';
           if (movies[position].posterPath != null) {
             image = NetworkImage(
               iconBase + movies[position].posterPath
@@ -55,13 +63,16 @@ class _MovieListState extends State<MovieList> {
             color: Colors.white,
             elevation: 2.0,
             child: ListTile(
+              onTap: () {
+                MaterialPageRoute route = MaterialPageRoute(
+                  builder: (_) => MovieDetail(movie:movies[position]));
+                Navigator.push(context, route);
+              },
               leading: CircleAvatar(
                 backgroundImage: image,
               ),
               title: Text(movies[position].title),
-              subtitle: Text('Released: '
-              + movies[position].releaseDate + ' - Vote: '
-              + movies[position].voteAverage.toString()),
+              subtitle: Text('$releaseHeading: $releaseDate - Vote: $voteAverage'),
             )
           );
         })
